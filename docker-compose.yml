@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  redmine:
+    image: redmine:latest
+    container_name: redmine-test02
+    ports:
+      - 8082:3000
+    environment:
+      TZ: Asia/Tokyo
+      REDMINE_DB_MYSQL: mysql-redmine-test02
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine
+      REDMINE_DB_ENCODING: utf8
+    depends_on:
+      - mysql
+    restart: always
+    volumes:
+      - ./data/my_prot01/redmine/files:/usr/src/redmine/files
+      - ./data/my_prot01/redmine/redmine/log:/usr/src/redmine/log
+      - ./data/my_prot01/redmine/plugins:/usr/src/redmine/plugins
+      - ./data/my_prot01/redmine/redmine/public/themes:/usr/src/redmine/public/themes
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-redmine-test02
+    restart: always
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ROOT_PASSWORD: redmine
+      MYSQL_DATABASE: redmine
+      MYSQL_USER: redmine
+      MYSQL_PASSWORD: redmine
+    volumes:
+      - ./data/db:/var/lib/mysql
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx-redmine-test02
+    depends_on:
+      - redmine
+    volumes:
+      - ./data/nginx:/etc/nginx/
+    ports:
+      - 8443:443
+      #- "8443:443"
